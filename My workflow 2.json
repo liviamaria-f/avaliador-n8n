@@ -1,0 +1,163 @@
+{
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "f642d641-1866-46f2-a56a-2fd1bc022ae5",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"nome_cliente\": \"Maria\",\n  \"nota_pedido\": 1,\n  \"comentario\": \"A pizza chegou fria pela demora da entrega. Péssimo\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        224,
+        0
+      ],
+      "id": "eb0ce6f5-b0da-47f5-b8f8-9fa419bbc69f",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "language": "pythonNative",
+        "pythonCode": "dados = _items[0][\"json\"]\nnome = dados.get(\"nome_cliente\", \"Cliente\")\nnota = int(dados.get(\"nota_pedido\", 5))\ncomentario = dados.get(\"comentario\",\"\").lower()\npalavras_urgentes = [\"fria\", \"demorou\", \"faltou\", \"péssimo\", \"ruim\", \"atrasou\", \"baixa qualidade\"]\nurgencia = \"BAIXA\"\nfor palavra in palavras_urgentes:\n    if palavra in comentario:\n        urgencia = \"ALTA\"\nif nota <= 3:\n    acao = \"Entrar em contato e perguntar o que aconteceu\"\nelse:\n    acao = \"Mensagem de agradecimento\"\nreturn [{\n    \"json\" : {\n        \"cliente\" : nome,\n        \"nota\": nota,\n        \"comentario_original\" : comentario,\n        \"urgencia_detectada\" : urgencia,\n        \"acao_sugerida\" : acao\n    }\n  }]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        0
+      ],
+      "id": "0b0891d9-64b0-4987-92e0-557f2bdfb45a",
+      "name": "Code in Python"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "=system",
+              "content": "==Você é um atendente do iFood. O cliente se chama {{ json.cliente }}. A nota dele foi {{ json.nota }}. O comentário foi: '{{ json.comentario_original }}'. A urgência detectada pelo sistema foi {{ json.urgencia_detectada }}. A ação sugerida é {{ $json.acao_sugerida }}. Escreva uma resposta empática, pedindo desculpas se necessário, e informe a ação que vamos tomar. Seja breve e amigável."
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        640,
+        16
+      ],
+      "id": "57d226e1-3eee-4801-90d5-46743894f4a8",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "28f0b115-7608-4d39-a9ea-09a971f56579",
+              "name": "resposta_final",
+              "value": "={{ $json.output[0].content[0].text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1008,
+        16
+      ],
+      "id": "66a03100-b76a-41c8-907c-434f2ba328e3",
+      "name": "Edit Fields1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Code in Python",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in Python": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "5c35ef6c-aaa8-480e-881b-6cddc6a3d346",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c7fc9172fe87d26a0eec7aa8c67f806a1c3a104bbd6e314db7a24620aaa84042"
+  },
+  "nodeGroups": [],
+  "id": "IqQCl4AyK1nlvjdo",
+  "tags": []
+}
