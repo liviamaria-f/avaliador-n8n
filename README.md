@@ -34,4 +34,3 @@ Para colocar em produção real no iFood, o node final (Edit Fields) seria subst
 
 ---
 *Desenvolvido por Livia Maria* 
-*(Adicione aqui o link do seu LinkedIn)*
